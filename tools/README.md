@@ -6,7 +6,7 @@ Everything ran on the Bizon on 2026-11-11, against public pages only. There was 
 - [`pages.txt`](pages.txt) lists the 34 paths fetched from `https://www.suitable.co`. They were fetched with `curl`, one at a time, 3 seconds apart.
 - [`html2text.py`](html2text.py) turns each saved page into text.
 - Lines that appear on 17 or more pages (the shared navigation) were then removed, which gives the `.clean.txt` files that `facts.md` cites.
-- The raw pages stay on the box, in `~/agent-research/evidence/suitable/raw/`.
+- The raw pages are in the local `raw/` folder, which git ignores. Since 2026-11-11 they live only in the copy on Connor's Mac; nothing is left on the Bizon.
 
 ## 2. REA on the app's login page and the NACE page
 

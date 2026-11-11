@@ -8,3 +8,5 @@ __pycache__/
 .serve.pid
 .serve.log
 !/index.html
+rea/
+.move-manifest.sha256

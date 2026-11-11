@@ -7,9 +7,9 @@
 > - [`evidence/facts.md`](evidence/facts.md): the cited fact sheet. A citation such as `GP:41` means page and line; the code table is at its top.
 > - [`evidence/api-surface.tsv`](evidence/api-surface.tsv) and [`evidence/screens.tsv`](evidence/screens.tsv): the two inventories taken from the shipped code.
 > - [`tools/`](tools/): the scripts that produced them. [`tools/README.md`](tools/README.md) explains how to re-run them.
-> - `index.html` + `serve.sh`: read all of this as a small local site. Run `./serve.sh`, then open http://localhost:8765. When it runs on the Bizon, first open a tunnel from the Mac: `ssh -N -L 8765:127.0.0.1:8765 bizon`.
+> - `index.html` + `serve.sh`: read all of this as a small local site. Run `./serve.sh`, then open http://localhost:8765.
 >
-> **Kept on the Bizon only,** in `~/agent-research/evidence/suitable/`: Suitable's own material, meaning the downloaded pages, the captured scripts, the REA captures and the screenshots. Those are their copyright, so they stay out of git.
+> **Kept out of git:** Suitable's own material, meaning the downloaded pages, the captured scripts, the REA captures and the screenshots. It sits in the local `raw/` and `rea/` folders, which `.gitignore` excludes, because it is their copyright. Since 2026-11-11 it lives only in the copy on Connor's Mac; nothing is on the Bizon.
 >
 > Nothing in this repo is Suitable's code or copy; it describes behaviour in our own words. Console ADRs cited below (ADR-0002, 0009, 0012, 0013, 0014, 0016) are in [Reformatic-ai/reformatic-console](https://github.com/Reformatic-ai/reformatic-console) `docs/adr/`.
 

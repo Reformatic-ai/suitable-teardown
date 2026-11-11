@@ -1,6 +1,6 @@
 # Suitable (suitable.co): facts from public material
 
-> In this repo, paths under `raw/` and `rea/` point to the Bizon copy in `~/agent-research/evidence/suitable/`. They hold Suitable's own pages, scripts and captures, which are kept out of git. The two inventories are in `evidence/`.
+> Paths under `raw/` and `rea/` are the local folders of those names next to this repo's files. They hold Suitable's own pages, scripts and captures, so `.gitignore` keeps them out of git; they exist only in the local copy on Connor's Mac. The two inventories are in `evidence/`.
 
 Built 2026-11-11 from 34 saved Suitable pages and 8 university and app-store pages. Vendor claims are marketing, not proof.
 
