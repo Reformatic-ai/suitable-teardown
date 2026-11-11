@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Suitable teardown</title>
+<style>
+  :root {
+    --bg: #fbfaf7; --panel: #f2f0ea; --text: #1d1d1b; --muted: #6b6a64;
+    --line: #dedbd2; --accent: #2f5d8a; --code: #eceae3; --row: #f6f4ef;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #161615; --panel: #1f1f1d; --text: #e9e7e1; --muted: #9b9990;
+      --line: #34332f; --accent: #8fb6dd; --code: #2a2a27; --row: #1b1b19; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+  .wrap { display: grid; grid-template-columns: 240px minmax(0, 1fr); min-height: 100vh; }
+  main { min-width: 0; overflow-wrap: anywhere; }
+  code { overflow-wrap: anywhere; }
+  nav { background: var(--panel); border-right: 1px solid var(--line); padding: 24px 16px;
+    position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  nav h1 { font-size: 15px; margin: 0 0 4px; }
+  nav p { font-size: 12px; color: var(--muted); margin: 0 0 20px; }
+  nav a { display: block; padding: 7px 10px; border-radius: 6px; color: var(--text);
+    text-decoration: none; font-size: 14px; }
+  nav a:hover { background: var(--line); }
+  nav a.on { background: var(--accent); color: var(--bg); }
+  main { padding: 32px 40px 80px; max-width: 980px; }
+  main h1 { font-size: 28px; line-height: 1.25; margin-top: 0; }
+  main h2 { font-size: 21px; margin-top: 2.2em; padding-top: .6em; border-top: 1px solid var(--line); }
+  main h3 { font-size: 17px; }
+  a { color: var(--accent); }
+  blockquote { margin: 0 0 1.2em; padding: 10px 16px; border-left: 3px solid var(--accent);
+    background: var(--panel); border-radius: 0 6px 6px 0; }
+  code { background: var(--code); padding: 1px 5px; border-radius: 4px; font-size: .88em; }
+  pre { background: var(--code); padding: 12px 14px; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
+  .tbl { overflow-x: auto; margin: 1em 0; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th, td { border: 1px solid var(--line); padding: 6px 9px; text-align: left; vertical-align: top; }
+  th { background: var(--panel); position: sticky; top: 0; overflow-wrap: normal; white-space: nowrap; }
+  tr:nth-child(even) td { background: var(--row); }
+  hr { border: 0; border-top: 1px solid var(--line); margin: 2em 0; }
+  .filter { width: 100%; max-width: 420px; padding: 8px 10px; font-size: 14px; border-radius: 6px;
+    border: 1px solid var(--line); background: var(--bg); color: var(--text); }
+  .count { color: var(--muted); font-size: 13px; margin-left: 8px; }
+  .err { color: #b3261e; }
+  @media (max-width: 760px) {
+    .wrap { grid-template-columns: minmax(0, 1fr); }
+    nav { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--line); padding: 16px; }
+    #links { display: flex; flex-wrap: wrap; gap: 4px; }
+    nav a { display: inline-block; }
+    th { position: static; }
+    main { padding: 20px 16px 60px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <h1>Suitable teardown</h1>
+    <p>Public pages only · 2026-11-11</p>
+    <div id="links"></div>
+  </nav>
+  <main id="doc">Loading…</main>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
+<script>
+const PAGES = [
+  ['README.md', 'Teardown'],
+  ['evidence/facts.md', 'Fact sheet'],
+  ['evidence/surface.md', 'What was read'],
+  ['evidence/api-surface.tsv', 'API methods (100)'],
+  ['evidence/screens.tsv', 'Screens (66)'],
+  ['tools/README.md', 'How it was made'],
+];
+const TSV_HEADERS = {
+  'evidence/api-surface.tsv': ['Chunk', 'Method', 'Verb', 'Path'],
+  'evidence/screens.tsv': ['Route', 'Title'],
+};
+const links = document.getElementById('links');
+const doc = document.getElementById('doc');
+for (const [path, label] of PAGES) {
+  const a = document.createElement('a');
+  a.href = '#' + path; a.textContent = label; a.dataset.path = path;
+  links.appendChild(a);
+}
+const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function dirOf(p) { const i = p.lastIndexOf('/'); return i < 0 ? '' : p.slice(0, i + 1); }
+function resolve(base, href) {
+  const parts = (dirOf(base) + href).split('/'); const out = [];
+  for (const x of parts) { if (x === '..') out.pop(); else if (x && x !== '.') out.push(x); }
+  return out.join('/');
+}
+function renderTsv(path, text) {
+  const head = TSV_HEADERS[path] || [];
+  const rows = text.trim().split('\n').map(l => l.split('\t'));
+  const label = (PAGES.find(p => p[0] === path) || [path, path])[1];
+  let h = `<h1>${esc(label)}</h1><p>Taken from the JavaScript that Suitable's login page serves to any visitor. See <a href="#tools/README.md">How it was made</a>.</p>`;
+  h += `<input class="filter" placeholder="Filter rows…" id="f"><span class="count" id="n"></span><div class="tbl"><table><thead><tr>`;
+  h += head.map(c => `<th>${esc(c)}</th>`).join('') + '</tr></thead><tbody id="tb">';
+  h += rows.map(r => '<tr>' + r.map(c => `<td>${c.startsWith('/') || c.startsWith('http') ? '<code>' + esc(c) + '</code>' : esc(c)}</td>`).join('') + '</tr>').join('');
+  h += '</tbody></table></div>';
+  doc.innerHTML = h;
+  const f = document.getElementById('f'), n = document.getElementById('n');
+  const trs = [...document.querySelectorAll('#tb tr')];
+  const upd = () => { const q = f.value.toLowerCase(); let k = 0;
+    for (const tr of trs) { const show = tr.textContent.toLowerCase().includes(q); tr.style.display = show ? '' : 'none'; k += show; }
+    n.textContent = `${k} of ${trs.length}`; };
+  f.addEventListener('input', upd); upd();
+}
+async function show(path) {
+  for (const a of links.children) a.classList.toggle('on', a.dataset.path === path);
+  try {
+    const r = await fetch(path, { cache: 'no-store' });
+    if (!r.ok) throw new Error(r.status + ' ' + r.statusText);
+    const text = await r.text();
+    if (path.endsWith('.tsv')) { renderTsv(path, text); }
+    else {
+      doc.innerHTML = DOMPurify.sanitize(marked.parse(text));
+      for (const t of doc.querySelectorAll('table')) {
+        const w = document.createElement('div'); w.className = 'tbl'; t.replaceWith(w); w.appendChild(t);
+      }
+      for (const a of doc.querySelectorAll('a[href]')) {
+        const href = a.getAttribute('href');
+        if (/^(https?:|mailto:|#)/.test(href)) { if (/^https?:/.test(href)) a.target = '_blank'; continue; }
+        let target = resolve(path, href.replace(/#.*$/, ''));
+        if (target.endsWith('/')) target += 'README.md';
+        if (!target.includes('.')) target += '/README.md';
+        a.href = '#' + target;
+      }
+    }
+    window.scrollTo(0, 0);
+  } catch (e) {
+    doc.innerHTML = `<p class="err">Could not load <code>${esc(path)}</code>: ${esc(String(e.message || e))}</p>`;
+  }
+}
+const route = () => show(decodeURIComponent(location.hash.slice(1)) || 'README.md');
+window.addEventListener('hashchange', route);
+route();
+</script>
+</body>
+</html>
