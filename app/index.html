@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Waypoint</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Ccircle cx=%2716%27 cy=%2716%27 r=%2714%27 fill=%27%2317544f%27/%3E%3Ccircle cx=%2716%27 cy=%2716%27 r=%276%27 fill=%27%23f6f3ec%27/%3E%3C/svg%3E">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="shell">
+  <aside class="side" aria-label="Main">
+    <div class="brand"><span class="mark" aria-hidden="true"></span><span id="brandName">Waypoint</span></div>
+    <div class="college" id="college"></div>
+    <nav id="nav" class="nav"></nav>
+    <div class="side-foot">
+      <button class="link" data-action="theme">Light / dark</button>
+      <button class="link" data-action="reset">Reset demo</button>
+      <p class="fine">Prototype on sample data. Nothing is saved outside this browser.</p>
+    </div>
+  </aside>
+  <div class="col">
+    <header class="top">
+      <div class="brand small"><span class="mark" aria-hidden="true"></span><span id="brandName2">Waypoint</span></div>
+      <div class="top-actions">
+        <button class="link" data-action="theme" aria-label="Switch light or dark">Theme</button>
+        <button class="link" data-action="reset">Reset</button>
+      </div>
+    </header>
+    <main id="main" tabindex="-1"></main>
+  </div>
+  <nav id="tabs" class="tabs" aria-label="Main"></nav>
+</div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

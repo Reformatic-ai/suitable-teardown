@@ -10,3 +10,4 @@ __pycache__/
 !/index.html
 rea/
 .move-manifest.sha256
+!/app/index.html
