@@ -1,0 +1,7 @@
+raw/
+*.html
+*.png
+*.json
+*.json.gz
+node_modules/
+__pycache__/

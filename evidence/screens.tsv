@@ -1,0 +1,68 @@
+institution.achievement	Achievement Detail
+institution.editAchievement	Edit Achievement
+institution.createAchievement	Create Achievement
+institution.activities	Activities
+institution.catalogDigest	Activities Digest
+institution.activityDetail	Activity Detail
+institution.editActivity	Edit Activity
+institution.pendingCompletionDetail	Pending Completion Detail
+institution.completionDetail	Completion Detail
+institution.createActivity	Create Activity
+institution.requestActivity	Request Activity
+institution.adoptSharedActivity	Adopt Activity
+institution.editAdoptedSharedActivity	Edit Activity
+institution.reviewActivityRequest	Review Activity Request
+institution.studentOrgs	Organizations
+institution.manageStudentOrg	Manage Student Organization
+institution.addStudentOrgMembers	Add Student Org Members
+institution.editStudentOrgMember	Edit Student Org Members
+institution.addUsers	Add Users
+institution.editUser	Edit User
+institution.rosterImports	Roster Imports
+institution.forms	Forms
+institution.createForm	Form Builder
+institution.editForm	Form Builder
+institution.careerReadiness	Career Readiness
+institution.approvals	Approvals
+courseBuilder	Course Builder
+courseLogs	Course Sync Logs
+institution.scorecardLookup	Scorecard Lookup
+institution.dashboard	Dashboard
+institution.explore	Explore
+institution.createGoal	Create Goal
+public.institution.leaderboard	Leaderboard
+institution.leaderboard	Leaderboard
+institution.employerRedirectProfile	Profile
+institution.notifications	Notifications
+institution.createPortfolioItem	Create Portfolio Item
+institution.editPortfolioItem	Edit Portfolio Item
+institution.portfolio	Portfolio
+public.institution.profile	Profile
+public.orgProfile	Profile
+organization.settings	Settings
+organization.forms	Forms
+organization.createForm	Form Builder
+organization.careerReadiness	Career Readiness
+public.institution.scorecard	Scorecard
+public.achievement	Achievement Detail
+public.studentOrgProfile	Student Org Profile
+publicForm.formSubmission	Submit Form
+publicForm.formSubmitTargetedResponse	Submit Form
+institution.workflow	Workflows
+institution.request	Requests
+organization.request	Requests
+organization.workflow	Workflows
+institution.financeAccounts	Finance Accounts
+organization.financeAccounts	Finance Accounts
+institution.settings	Settings
+public.error	Error
+organization.studentOrgs	Student Organizations
+organization.createStudentOrg	Create Student Organization
+organization.manageStudentOrg	Manage Student Organization
+organization.addStudentOrgMembers	Add Student Org Members
+organization.editStudentOrgMember	Edit Student Org Member
+organization.addUsers	Add Users
+organization.editUser	Edit User
+organization.handshakeImports	Handshake Imports
+institution.achievements	
+organization.editForm	
