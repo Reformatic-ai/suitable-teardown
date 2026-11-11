@@ -108,7 +108,7 @@ main { padding: 20px 16px 96px; max-width: 1040px; margin: 0 auto; outline: none
 .btn.ghost { background: transparent; color: var(--brand); }
 .btn[disabled] { opacity: .5; cursor: not-allowed; }
 label { font-weight: 600; display: block; margin-bottom: 6px; }
-input[type=text], input[type=search], select, textarea { width: 100%; min-height: 44px; padding: 10px 12px; border-radius: 10px;
+input[type=text], input[type=search], input[type=number], select, textarea { width: 100%; min-height: 44px; padding: 10px 12px; border-radius: 10px;
   border: 1px solid var(--line); background: var(--surface); }
 textarea { min-height: 140px; resize: vertical; }
 .filters { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr)); }
@@ -158,6 +158,43 @@ textarea { min-height: 140px; resize: vertical; }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
 @media (min-width: 900px) { .toast { bottom: 28px; } }
 @media (prefers-reduced-motion: reduce) { .toast { transition: none; } }
+
+/* ---------- staff side ---------- */
+[hidden] { display: none !important; }
+.roleseg { display: flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; margin: 0 0 14px; }
+.roleseg a { flex: 1; text-align: center; padding: 7px 8px; text-decoration: none; color: var(--muted); font-size: 14px; }
+.roleseg a.on { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+.rolelink { border: 1px solid var(--line); border-radius: 99px; padding: 5px 10px; text-decoration: none; color: var(--ink); font-size: 14px; white-space: nowrap; align-self: center; }
+:root[data-role="staff"] .mark { background: var(--accent); }
+.count { margin-left: auto; background: var(--ink); color: var(--bg); border-radius: 99px; font-size: 12px; font-weight: 700; padding: 1px 7px; }
+.tabs a { position: relative; }
+.tabs .count { position: absolute; top: 2px; left: calc(50% + 6px); margin: 0; }
+.tiles { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); }
+.tile { display: block; text-decoration: none; color: inherit; }
+a.tile:hover { border-color: var(--brand); }
+.tile .n { font: 600 34px/1.1 ui-serif, Georgia, serif; }
+.tile .l { color: var(--muted); font-size: 14px; }
+.todo { list-style: none; margin: 6px 0 0; padding: 0; }
+.todo li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.todo li:last-child { border-bottom: 0; padding-bottom: 0; }
+.q { margin: 0; padding: 10px 12px; background: var(--off-soft); border-radius: 10px; white-space: pre-wrap; }
+.rows { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.rowitem { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.rowitem .grow { flex: 1 1 280px; min-width: 0; }
+.meta { font-size: 13px; color: var(--muted); }
+.btn.sm { min-height: 36px; padding: 6px 12px; font-size: 14px; }
+fieldset { border: 1px solid var(--line); border-radius: 12px; padding: 14px; margin: 0; min-width: 0; }
+fieldset.card { padding: 16px; }
+legend { font-weight: 700; padding: 0 6px; }
+.fgrid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); }
+.checks { display: flex; flex-wrap: wrap; gap: 6px 20px; }
+.checks label { font-weight: 400; display: inline-flex; align-items: center; gap: 8px; margin: 0; min-height: 34px; }
+.checks input { width: 18px; height: 18px; accent-color: var(--brand); flex: none; }
+.codebig { font: 700 clamp(34px, 10vw, 76px)/1.1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: .04em; color: var(--brand); padding: 18px 0 10px; }
+.tbl { width: 100%; min-width: 640px; border-collapse: collapse; font-size: 15px; }
+.tbl th { text-align: left; font-size: 13px; color: var(--muted); font-weight: 600; padding: 6px 12px 8px 0; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.tbl td { padding: 10px 12px 10px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+.tbl tr:last-child td { border-bottom: 0; }
 
 @media print {
   .side, .top, .tabs, .toast, .noprint { display: none !important; }

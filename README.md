@@ -7,7 +7,11 @@
 > - [`evidence/facts.md`](evidence/facts.md): the cited fact sheet. A citation such as `GP:41` means page and line; the code table is at its top.
 > - [`evidence/api-surface.tsv`](evidence/api-surface.tsv) and [`evidence/screens.tsv`](evidence/screens.tsv): the two inventories taken from the shipped code.
 > - [`tools/`](tools/): the scripts that produced them. [`tools/README.md`](tools/README.md) explains how to re-run them.
-> - [`app/`](app/): **Waypoint**, a clickable front-end prototype of our own student engagement app (working name; original design, invented sample data, no backend). Run `./serve.sh`, then open http://localhost:8765/app/. To rename it, change `appName` in `app/data.js`.
+> - [`app/`](app/): **Waypoint**, a clickable front-end prototype of our own student engagement app (working name; original design, invented sample data, no backend). Run `./serve.sh`, then open http://localhost:8765/app/.
+>   - **Student view:** home, activity catalog, check-in by code, reflections and files, points, levels, badges, transcript, organizations, leaderboard.
+>   - **Staff view** (switch at the top): overview, approvals (approve, send back with a note, approve several at once), activities (create, edit, draft or publish), a door view for events (show the code, open or close check-in, give credit by hand) and a student roster.
+>   - Both views share the same data in the browser, so a staff decision shows up for the student straight away. In a real build the staff view would sit behind a staff sign-in.
+>   - To rename the app, change `appName` in `app/data.js`.
 > - `index.html` + `serve.sh`: read all of this as a small local site. Run `./serve.sh`, then open http://localhost:8765.
 >
 > **Kept out of git:** Suitable's own material, meaning the downloaded pages, the captured scripts, the REA captures and the screenshots. It sits in the local `raw/` and `rea/` folders, which `.gitignore` excludes, because it is their copyright. Since 2026-11-11 it lives only in the copy on Connor's Mac; nothing is on the Bizon.

@@ -1,14 +1,14 @@
 (function () {
   'use strict';
   var D = window.WP_DATA;
-  var KEY = 'waypoint-demo-v2';
+  var KEY = 'waypoint-demo-v3';
   var main = document.getElementById('main');
   var ui = { q: '', comp: '', depth: '', type: '', board: 'students', formError: '' };
 
   // ---------- state ----------
   function fresh() { return JSON.parse(JSON.stringify(D.seed)); }
   function load() {
-    try { var s = JSON.parse(localStorage.getItem(KEY)); if (s && s.completions) return s; } catch (e) {}
+    try { var s = JSON.parse(localStorage.getItem(KEY)); if (s && s.completions && s.queue) return s; } catch (e) {}
     return fresh();
   }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
@@ -16,12 +16,17 @@
 
   // ---------- helpers ----------
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
-  function act(id) { return D.activities.filter(function (a) { return a.id === id; })[0]; }
+  // The catalog: built-in activities with staff edits applied, plus the ones staff created.
+  function acts() {
+    return D.activities.map(function (a) { var e = state.edits[a.id]; return e ? Object.assign({}, a, e) : a; }).concat(state.custom);
+  }
+  function live() { return acts().filter(function (a) { return a.live !== false; }); } // what students can see
+  function act(id) { return acts().filter(function (a) { return a.id === id; })[0]; }
   function comp(id) { return D.competencies.filter(function (c) { return c.id === id; })[0]; }
   function today() { return new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }); }
   function words(t) { return (t.trim().match(/\S+/g) || []).length; }
 
-  function status(a) { // 'done' | 'pending' | 'open'
+  function status(a) { // 'done' | 'pending' | 'returned' | 'open'
     if (a.type === 'set') return a.parts.every(function (p) { return status(act(p)) === 'done'; }) ? 'done' : 'open';
     var c = state.completions[a.id];
     return c ? c.status : 'open';
@@ -32,7 +37,7 @@
     return (state.completions[a.id] || {}).seq || 0;
   }
   function doneList() {
-    return D.activities.filter(function (a) { return status(a) === 'done'; }).sort(function (x, y) { return seq(x) - seq(y); });
+    return acts().filter(function (a) { return status(a) === 'done'; }).sort(function (x, y) { return seq(x) - seq(y); });
   }
   function points() { return doneList().reduce(function (n, a) { return n + a.points; }, 0); }
   function level(p) {
@@ -101,6 +106,7 @@
     var s = status(a);
     if (s === 'done') return '<span class="pill ok">Completed</span>';
     if (s === 'pending') return '<span class="pill warn">Waiting for approval</span>';
+    if (s === 'returned') return '<span class="pill warn">Sent back</span>';
     if (a.type === 'event') return a.window === 'open' ? '<span class="pill live">Check-in open</span>' : a.window === 'upcoming' ? '<span class="pill">Upcoming</span>' : '<span class="pill">Ended</span>';
     return '';
   }
@@ -117,14 +123,15 @@
   // ---------- screens ----------
   function home() {
     var p = points(), L = level(p), cc = compCounts();
-    var open = D.activities.filter(function (a) { return status(a) === 'open' && a.window !== 'closed'; });
+    var open = live().filter(function (a) { var s = status(a); return (s === 'open' || s === 'returned') && a.window !== 'closed'; });
     // Suggest what fills the thinnest competencies first.
     var next = open.slice().sort(function (x, y) {
       function need(a) { return Math.min.apply(null, a.comps.map(function (c) { return cc[c]; })); }
       return need(x) - need(y) || y.points - x.points;
     }).slice(0, 3);
-    var soon = D.activities.filter(function (a) { return a.type === 'event' && a.window !== 'closed' && status(a) !== 'done'; }).slice(0, 3);
-    var pend = D.activities.filter(function (a) { return status(a) === 'pending'; });
+    var soon = live().filter(function (a) { return a.type === 'event' && a.window !== 'closed' && status(a) !== 'done'; }).slice(0, 3);
+    var pend = acts().filter(function (a) { return status(a) === 'pending'; });
+    var back = acts().filter(function (a) { return status(a) === 'returned'; });
     return '<div class="stack">' +
       '<div class="head"><div><h1>Hello, ' + esc(D.me.name.split(' ')[0]) + '</h1><p class="sub">' + esc(D.me.program) + ' · ' + esc(D.me.year) + '</p></div></div>' +
       '<div class="card hero"><div class="row between"><div><div class="sub">Level ' + L.cur.n + '</div><h2>' + esc(L.cur.name) + '</h2></div>' +
@@ -132,6 +139,7 @@
         '<div class="bar" style="margin:14px 0 8px" role="progressbar" aria-label="Progress to next level" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + L.pct + '"><i style="width:' + L.pct + '%"></i></div>' +
         '<div class="sub">' + (L.next ? (L.next.min - p) + ' points to ' + esc(L.next.name) : 'Top level reached') + ' · ' + earned().length + ' of ' + D.badges.length + ' badges</div></div>' +
       (pend.length ? '<div class="note">' + pend.length + ' submission' + (pend.length > 1 ? 's are' : ' is') + ' waiting for staff approval: ' + pend.map(function (a) { return '<a href="#/activity/' + a.id + '">' + esc(a.title) + '</a>'; }).join(', ') + '.</div>' : '') +
+      (back.length ? '<div class="note">Sent back for changes: ' + back.map(function (a) { return '<a href="#/activity/' + a.id + '">' + esc(a.title) + '</a>'; }).join(', ') + '.</div>' : '') +
       '<section class="sect"><h2>Good next steps</h2><p class="sub" style="margin:-6px 0 10px">Picked to fill the competencies you have done least.</p><div class="grid">' + next.map(card).join('') + '</div></section>' +
       '<section class="sect"><div class="row between"><h2>Coming up</h2><a href="#/explore">See everything</a></div><div class="grid" style="margin-top:10px">' + soon.map(card).join('') + '</div></section>' +
       '</div>';
@@ -143,8 +151,8 @@
       (!ui.comp || a.comps.indexOf(ui.comp) >= 0) && (!ui.depth || String(a.depth) === ui.depth) && (!ui.type || a.type === ui.type);
   }
   function results() {
-    var list = D.activities.filter(matches);
-    return '<p class="sub" id="count">' + list.length + ' of ' + D.activities.length + ' activities</p>' +
+    var all = live(), list = all.filter(matches);
+    return '<p class="sub" id="count">' + list.length + ' of ' + all.length + ' activities</p>' +
       (list.length ? '<div class="grid">' + list.map(card).join('') + '</div>' : '<div class="card">Nothing matches. Try removing a filter.</div>');
   }
   function opt(v, label, cur) { return '<option value="' + v + '"' + (cur === v ? ' selected' : '') + '>' + esc(label) + '</option>'; }
@@ -167,9 +175,10 @@
     if (s === 'pending') {
       return '<div class="card"><span class="pill warn">Waiting for approval</span><p style="margin-top:8px">Staff at ' + esc(a.host) + ' will review what you sent. Points arrive when they approve.</p>' +
         (c.text ? '<p class="hint">You wrote: “' + esc(c.text) + '”</p>' : '') + (c.file ? '<p class="hint">You sent: ' + esc(c.file) + '</p>' : '') +
-        '<div class="note" style="margin-top:12px"><strong>Demo only.</strong> There is no staff side in this prototype, so you can stand in for them. <div style="margin-top:8px"><button class="btn ghost" data-action="approve" data-id="' + a.id + '">Approve as staff</button></div></div></div>';
+        '<div class="note" style="margin-top:12px"><strong>Demo.</strong> To review it yourself, open <a href="#/staff/approvals">Approvals in the staff view</a>.</div></div>';
     }
     var err = ui.formError ? '<p class="err" role="alert">' + esc(ui.formError) + '</p>' : '';
+    var back = s === 'returned' ? '<div class="note" style="margin-bottom:14px"><strong>Sent back by ' + esc(a.host) + '.</strong> ' + esc(c.note || '') + ' Change it and send it again.</div>' : '';
     if (a.type === 'set') {
       return '<div class="card"><h2>Parts of this set</h2><div class="grid" style="margin-top:10px">' + a.parts.map(function (p) { return card(act(p)); }).join('') + '</div></div>';
     }
@@ -182,17 +191,17 @@
         '<p class="hint">Demo: the code for this event is <strong>' + esc(a.code) + '</strong>.</p><div style="margin-top:12px"><button class="btn">Check in</button></div></form>';
     }
     if (a.proof === 'file') {
-      return '<form class="card" data-form="file" data-id="' + a.id + '"><h2>Send your work</h2><p class="sub" style="margin:6px 0 12px">Upload one file. ' + esc(a.host) + ' will review it.</p>' +
+      return '<form class="card" data-form="file" data-id="' + a.id + '">' + back + '<h2>Send your work</h2><p class="sub" style="margin:6px 0 12px">Upload one file. ' + esc(a.host) + ' will review it.</p>' +
         '<label for="file">File</label><input id="file" name="file" type="file" required>' + err +
         '<p class="hint">Demo: the file stays on your device. Only its name is kept.</p><div style="margin-top:12px"><button class="btn">Send for approval</button></div></form>';
     }
-    return '<form class="card" data-form="reflect" data-id="' + a.id + '"><h2>Write your reflection</h2><p class="sub" style="margin:6px 0 12px">At least ' + a.minWords + ' words. ' + (a.approval ? esc(a.host) + ' will review it.' : 'Credit is given as soon as you submit.') + '</p>' +
-      '<label for="text">Reflection</label><textarea id="text" name="text" required></textarea><p class="hint" id="wc">0 words</p>' + err +
+    return '<form class="card" data-form="reflect" data-id="' + a.id + '">' + back + '<h2>Write your reflection</h2><p class="sub" style="margin:6px 0 12px">At least ' + a.minWords + ' words. ' + (a.approval ? esc(a.host) + ' will review it.' : 'Credit is given as soon as you submit.') + '</p>' +
+      '<label for="text">Reflection</label><textarea id="text" name="text" required>' + esc(s === 'returned' ? c.text || '' : '') + '</textarea><p class="hint" id="wc">' + (s === 'returned' ? words(c.text || '') : 0) + ' words</p>' + err +
       '<div style="margin-top:12px"><button class="btn">' + (a.approval ? 'Send for approval' : 'Submit') + '</button></div></form>';
   }
   function activity(id) {
-    var a = act(id); if (!a) return '<div class="card">That activity was not found. <a href="#/explore">Back to Explore</a></div>';
-    var inSets = D.activities.filter(function (s) { return s.type === 'set' && s.parts.indexOf(a.id) >= 0; });
+    var a = act(id); if (!a || a.live === false) return '<div class="card">That activity was not found. <a href="#/explore">Back to Explore</a></div>';
+    var inSets = live().filter(function (s) { return s.type === 'set' && s.parts.indexOf(a.id) >= 0; });
     return '<div class="stack"><div><a class="back" href="#/explore">← Explore</a>' +
       '<div class="row" style="margin-bottom:8px"><span class="pill accent">' + TYPE[a.type] + ' · ' + esc(D.depths[a.depth]) + '</span>' + statusPill(a) + '</div>' +
       '<h1>' + esc(a.title) + '</h1><p class="sub" style="margin-top:4px">' + esc(a.host) + '</p></div>' +
@@ -258,7 +267,7 @@
   function board() {
     var rows, students = ui.board === 'students';
     if (students) {
-      rows = D.peers.map(function (p) { return { name: p.name, points: p.points }; });
+      rows = D.peers.map(function (p) { return { name: p.name, points: p.points + (state.peerBonus[p.name] || 0) }; });
       if (!state.optOut) rows.push({ name: D.me.name + ' (you)', points: points(), me: true });
     } else rows = D.groups.slice();
     rows.sort(function (a, b) { return b.points - a.points; });
@@ -270,10 +279,11 @@
   }
 
   // ---------- routing ----------
-  function route() { var h = location.hash.replace(/^#\/?/, '').split('/'); return { name: h[0] || 'home', id: h[1] }; }
-  function render(keepScroll) {
-    var r = route(), html;
-    if (r.name === 'explore') html = explore();
+  function route() { var h = location.hash.replace(/^#\/?/, '').split('/'); return { name: h[0] || 'home', id: h[1], parts: h }; }
+  function render() {
+    var r = route(), html, staff = r.name === 'staff' && !!WP.staff;
+    if (staff) html = WP.staff.screen(r.parts.slice(1));
+    else if (r.name === 'explore') html = explore();
     else if (r.name === 'activity') html = activity(r.id);
     else if (r.name === 'record') html = record();
     else if (r.name === 'transcript') html = transcript();
@@ -282,31 +292,38 @@
     else if (r.name === 'board') html = board();
     else { r.name = 'home'; html = home(); }
     main.innerHTML = html;
-    var sect = { activity: 'explore', org: 'orgs' }[r.name] || r.name;
-    function links(list, withIcon) {
+    var sect = staff ? WP.staff.section(r.parts.slice(1)) : ({ activity: 'explore', org: 'orgs' }[r.name] || r.name);
+    var base = staff ? '#/staff/' : '#/';
+    function links(list, tabs) {
       return list.map(function (n) {
-        var on = n[0] === sect || (list === TABS && sect === 'transcript' && n[0] === 'record');
-        return '<a href="#/' + n[0] + '"' + (on ? ' class="on" aria-current="page"' : '') + '>' + icon(n[0]) + '<span>' + n[1] + '</span></a>';
+        var on = n[0] === sect || (!staff && tabs && sect === 'transcript' && n[0] === 'record');
+        return '<a href="' + base + n[0] + '"' + (on ? ' class="on" aria-current="page"' : '') + '>' + icon(n[0]) + '<span>' + n[1] + '</span>' +
+          (n[2] ? '<b class="count" aria-label="' + n[2] + ' waiting">' + n[2] + '</b>' : '') + '</a>';
       }).join('');
     }
-    document.getElementById('nav').innerHTML = links(NAV);
-    document.getElementById('tabs').innerHTML = links(TABS);
-    document.title = D.appName;
+    document.getElementById('nav').innerHTML = links(staff ? WP.staff.nav() : NAV);
+    document.getElementById('tabs').innerHTML = links(staff ? WP.staff.nav() : TABS, true);
+    // Student / staff switch. A real build would put the staff view behind a staff sign-in.
+    document.getElementById('role').innerHTML = '<a href="#/home"' + (staff ? '' : ' class="on" aria-current="true"') + '>Student</a>' +
+      '<a href="#/staff/overview"' + (staff ? ' class="on" aria-current="true"' : '') + '>Staff</a>';
+    var rl = document.getElementById('roleLink');
+    rl.setAttribute('href', staff ? '#/home' : '#/staff/overview'); rl.textContent = staff ? 'Student view' : 'Staff view';
+    document.documentElement.setAttribute('data-role', staff ? 'staff' : 'student');
+    document.title = D.appName + (staff ? ' · Staff' : '');
   }
-  function go() { ui.formError = ''; render(); window.scrollTo(0, 0); main.focus({ preventScroll: true }); }
+  function go() { ui.formError = ''; if (WP.staff) WP.staff.reset(); render(); window.scrollTo(0, 0); main.focus({ preventScroll: true }); }
 
   // ---------- events ----------
   function applyTheme() { if (state.theme) document.documentElement.setAttribute('data-theme', state.theme); else document.documentElement.removeAttribute('data-theme'); }
   document.addEventListener('click', function (e) {
     var b = e.target.closest('[data-action]'); if (!b || b.tagName === 'INPUT') return;
     var a = b.getAttribute('data-action'), id = b.getAttribute('data-id');
+    if (WP.staff && WP.staff.click(a, b)) return;
     if (a === 'theme') {
       var dark = state.theme ? state.theme === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
       state.theme = dark ? 'light' : 'dark'; save(); applyTheme();
     } else if (a === 'reset') {
-      var th = state.theme; state = fresh(); state.theme = th; save(); ui.formError = ''; render(); toast('Demo reset to its starting point');
-    } else if (a === 'approve') {
-      change(function () { state.completions[id].status = 'done'; state.completions[id].at = today(); state.completions[id].seq = Date.now(); }, 'Approved');
+      var th = state.theme; state = fresh(); state.theme = th; save(); ui.formError = ''; if (WP.staff) WP.staff.reset(); render(); toast('Demo reset to its starting point');
     } else if (a === 'join') {
       var i = state.joined.indexOf(id), name = D.orgs.filter(function (o) { return o.id === id; })[0].name;
       if (i >= 0) state.joined.splice(i, 1); else state.joined.push(id);
@@ -316,18 +333,21 @@
   });
   document.addEventListener('change', function (e) {
     var t = e.target, a = t.getAttribute('data-action');
+    if (WP.staff && WP.staff.change(t)) return;
     if (a === 'optout') { state.optOut = t.checked; save(); render(); toast(t.checked ? 'You are hidden from the leaderboard' : 'You are back on the leaderboard'); }
     else if (a === 'share') { state.share = t.checked; save(); render(); toast(t.checked ? 'Sharing is on' : 'Sharing is off'); }
     else if (t.getAttribute('data-f')) { ui[t.getAttribute('data-f')] = t.value; document.getElementById('results').innerHTML = results(); }
   });
   document.addEventListener('input', function (e) {
     var t = e.target;
+    if (WP.staff && WP.staff.input(t)) return;
     if (t.getAttribute('data-f') === 'q') { ui.q = t.value; document.getElementById('results').innerHTML = results(); }
     if (t.id === 'text') document.getElementById('wc').textContent = words(t.value) + ' words';
   });
   document.addEventListener('submit', function (e) {
     var f = e.target, kind = f.getAttribute('data-form'); if (!kind) return;
     e.preventDefault();
+    if (WP.staff && WP.staff.submit(kind, f, e)) return;
     var a = act(f.getAttribute('data-id'));
     function fail(msg, field) { ui.formError = msg; render(); var el = document.getElementById(field); if (el) el.focus(); }
     if (kind === 'checkin') {
@@ -353,6 +373,11 @@
   document.getElementById('brandName').textContent = D.appName;
   document.getElementById('brandName2').textContent = D.appName;
   document.getElementById('college').textContent = D.college;
-  applyTheme();
-  render();
+  // Shared with staff.js, which registers itself as WP.staff.
+  var WP = window.WP = {
+    D: D, ICON: ICON, TYPE: TYPE, s: function () { return state; }, save: save, render: render, toast: toast, esc: esc,
+    act: act, acts: acts, comp: comp, today: today, words: words, status: status, points: points, level: level,
+    compCounts: compCounts, doneList: doneList, earned: earned, completedAt: completedAt, compTags: compTags, opt: opt,
+  };
+  document.addEventListener('DOMContentLoaded', function () { applyTheme(); render(); });
 })();

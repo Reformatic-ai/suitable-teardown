@@ -3,6 +3,7 @@
 window.WP_DATA = {
   appName: 'Waypoint', // placeholder name: change it here
   college: 'Northfield College',
+  staff: { name: 'Dana Whitlock', unit: 'Student Life' },
   me: { id: 'me', name: 'Riley Okafor', program: 'B.Sc. Environmental Science', year: 'Second year', initials: 'RO' },
 
   // Student levels, by total points.
@@ -25,6 +26,7 @@ window.WP_DATA = {
 
   // depth 1 = show up, 2 = take part, 3 = contribute, 4 = lead
   depths: { 1: 'Show up', 2: 'Take part', 3: 'Contribute', 4: 'Lead' },
+  depthPoints: { 1: 10, 2: 25, 3: 50, 4: 100 }, // default points for a new activity at each depth
 
   activities: [
     { id: 'a1', type: 'event', title: 'Résumé clinic drop-in', host: 'Career Centre', depth: 1, points: 10,
@@ -97,10 +99,19 @@ window.WP_DATA = {
 
   // Other students on the board (points are fixed sample values).
   peers: [
-    { name: 'Amara Lindqvist', points: 640 }, { name: 'Jonah Ferreira', points: 455 }, { name: 'Priya Nand', points: 380 },
-    { name: 'Kofi Mensah', points: 310 }, { name: 'Mei Tanaka', points: 265 }, { name: 'Lena Havel', points: 190 },
-    { name: 'Tom Reyes', points: 150 }, { name: 'Sadie Brennan', points: 120 }, { name: 'Omar Idris', points: 85 },
+    { name: 'Amara Lindqvist', points: 640, program: 'B.A. Geography', last: 'Yesterday' },
+    { name: 'Jonah Ferreira', points: 455, program: 'B.A. Politics', last: '2 days ago' },
+    { name: 'Priya Nand', points: 380, program: 'B.Sc. Biology', last: '3 days ago' },
+    { name: 'Kofi Mensah', points: 310, program: 'B.A. Journalism', last: 'Yesterday' },
+    { name: 'Mei Tanaka', points: 265, program: 'B.Sc. Environmental Science', last: '2 days ago' },
+    { name: 'Lena Havel', points: 190, program: 'B.Sc. Sport Science', last: '4 days ago' },
+    { name: 'Tom Reyes', points: 150, program: 'B.A. Economics', last: '3 days ago' },
+    { name: 'Sadie Brennan', points: 120, program: 'B.A. English', last: '5 weeks ago', quiet: true },
+    { name: 'Omar Idris', points: 85, program: 'B.Sc. Chemistry', last: 'Yesterday' },
+    { name: 'Hana Sato', points: 40, program: 'B.A. Design', last: '7 weeks ago', quiet: true },
   ],
+  // How many other students have completed each activity (fixed sample values).
+  baseDone: { a1: 38, a2: 22, a5: 61, a6: 17, a7: 6, a8: 9, a9: 44, a10: 12, a11: 14, a12: 19, s1: 5, s2: 11 },
   groups: [
     { name: 'Green Campus Society', points: 4210 }, { name: 'Peer Mentoring', points: 3890 }, { name: 'Debate Union', points: 2140 },
     { name: 'The Northfield Post', points: 1675 }, { name: 'Trail Running Club', points: 1320 }, { name: 'Makers Collective', points: 940 },
@@ -117,5 +128,23 @@ window.WP_DATA = {
     joined: ['o1'],
     optOut: false,
     share: false,
+    // Staff side: other students' submissions waiting for a decision.
+    queue: [
+      { id: 'q1', student: 'Mei Tanaka', activity: 'a6', at: '9 Nov',
+        text: 'I spoke with a water quality officer at the regional council for about twenty minutes. I was surprised that most of her week is spent writing and explaining results to farmers, not in the field. Next I will take the science communication elective and ask to shadow a site visit in spring.' },
+      { id: 'q2', student: 'Tom Reyes', activity: 'a8', at: '8 Nov', file: 'post-student-housing-article.pdf' },
+      { id: 'q3', student: 'Lena Havel', activity: 'a10', at: '7 Nov',
+        text: 'My mentee and I met five times this term. In our third meeting I had planned to talk about exam timetables, but she wanted to talk about whether to change course. I stopped giving advice and asked questions instead, and she worked out that she wanted to speak to her tutor first. I learned to bring fewer plans and to leave more room for what the other person needs that day.' },
+      { id: 'q4', student: 'Omar Idris', activity: 'a7', at: '10 Nov',
+        text: 'I went to the chemistry study group in the library every week for four weeks. Hana ran it and booked the room each time. I found the practice questions useful and I think my marks will improve because of it. The group was friendly and I would go again next term. I did not have to change anything after the first week because it was already well organised.' },
+    ],
+    custom: [],   // activities staff created
+    edits: {},    // staff changes to built-in activities, by id
+    others: {},   // other students given credit by staff, by activity id
+    peerBonus: {}, // points other students gained through staff decisions
+    log: [
+      { at: '6 Nov', student: 'Priya Nand', title: 'Write for the campus paper', decision: 'Approved', note: '' },
+      { at: '5 Nov', student: 'Jonah Ferreira', title: 'Informational interview', decision: 'Sent back', note: 'Tell us what you will do next, not only what was said.' },
+    ],
   },
 };
