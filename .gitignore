@@ -5,3 +5,5 @@ raw/
 *.json.gz
 node_modules/
 __pycache__/
+.serve.pid
+.serve.log

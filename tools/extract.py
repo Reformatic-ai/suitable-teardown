@@ -3,6 +3,7 @@ d, out = sys.argv[1], sys.argv[2]
 src = {os.path.basename(f).split('.')[0]: open(f, encoding='utf-8', errors='replace').read() for f in glob.glob(os.path.join(d, '*.js'))}
 # 1. API client methods: key:"name",value:function(...){... this.fetcher("".concat(...)...,{method:"X"
 api = []
+consts = {c: dict(re.findall(r'[,\s(](\w{1,2})="(/v1/[^"]+)"', s)) for c, s in src.items()}
 for chunk, t in src.items():
     for m in re.finditer(r'\{key:"(\w+)",value:function', t):
         body = t[m.end():m.end()+900]
@@ -12,11 +13,21 @@ for chunk, t in src.items():
         f = body[body.find('fetcher('):]
         end = f.find(',{')
         call = f[:end if end > 0 else 300]
-        parts = re.findall(r'"([^"]*)"|\.concat\((\w+)', call)
-        path = ''.join(p[0] if p[0] else '{%s}' % p[1] for p in parts if (p[0] or p[1]))
+        first = re.match(r'fetcher\((\w+)(?:[,)]|$)', call)
+        if first:  # URL built into a variable first: use that assignment
+            asg = re.search(r'(?:var |,)%s=("".concat[^;]*?)(?=;|,\w+=|return)' % re.escape(first.group(1)), body)
+            if asg: call = asg.group(1)
+        parts = re.findall(r'"([^"]*)"|\.concat\(([\w.]+)', call)
+        path = ''
+        for lit, var in parts:
+            if lit: path += lit
+            elif var in consts.get(chunk, {}): path += consts[chunk][var]
+            elif var: path += '{value}' if path.endswith('=') else '{id}'
         path = re.sub(r'^https://app\.suitable\.co', '', path)
         meth = re.search(r'method:"(\w+)"', body)
-        api.append((chunk, m.group(1), meth.group(1) if meth else 'GET', path))
+        verb = meth.group(1) if meth else 'GET'
+        if re.search(r'method:\w\b', body) and '"PUT"' in body and '"DELETE"' in body: verb = 'PUT or DELETE'
+        api.append((chunk, m.group(1), verb, path))
 # 2. route names and titles: VAR="a.b" definitions, then (s,VAR,"Title") pairs
 names, titles = {}, {}
 for chunk, t in src.items():

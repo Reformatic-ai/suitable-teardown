@@ -7,6 +7,7 @@
 > - [`evidence/facts.md`](evidence/facts.md): the cited fact sheet. A citation such as `GP:41` means page and line; the code table is at its top.
 > - [`evidence/api-surface.tsv`](evidence/api-surface.tsv) and [`evidence/screens.tsv`](evidence/screens.tsv): the two inventories taken from the shipped code.
 > - [`tools/`](tools/): the scripts that produced them. [`tools/README.md`](tools/README.md) explains how to re-run them.
+> - `index.html` + `serve.sh`: read all of this as a small local site. Run `./serve.sh`, then open http://localhost:8765. When it runs on the Bizon, first open a tunnel from the Mac: `ssh -N -L 8765:127.0.0.1:8765 bizon`.
 >
 > **Kept on the Bizon only,** in `~/agent-research/evidence/suitable/`: Suitable's own material, meaning the downloaded pages, the captured scripts, the REA captures and the screenshots. Those are their copyright, so they stay out of git.
 >
@@ -89,16 +90,19 @@
 - Every tenant has **service permissions**: an on/off switch per module.
 - Every institution has an **email quota** for notifications, with a limit.
 
-**The API the login page ships** (100 methods in `rea/api-surface.tsv`)
+**The API the login page ships** (100 methods in [`evidence/api-surface.tsv`](evidence/api-surface.tsv))
 
 | First path segment | Methods |
 |---|---|
 | organizations | 25 |
 | institutions | 23 |
-| admin | 21 |
+| admin | 23 |
+| schools | 5 |
 | employers | 4 |
+| auth | 4 |
 | competencies | 3 |
 | reports | 3 |
+| others (public, partnerships, me, users, levels, catalogs, the Suity chat) | 10 |
 
 - **Admin:**
   - enable, disable or delete an institution;
@@ -121,7 +125,7 @@
 
 [inference] The everyday student calls (activities, completions, badges, the transcript) are not in this client. They load only after sign-in.
 
-**Screens** (66 named routes with titles, in `rea/screens.tsv`)
+**Screens** (66 named routes with titles, in [`evidence/screens.tsv`](evidence/screens.tsv))
 
 **Inside an institution:**
 - **Home and activities.**
