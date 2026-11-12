@@ -4,6 +4,7 @@
   var KEY = 'waypoint-demo-v3';
   var main = document.getElementById('main');
   var ui = { q: '', comp: '', depth: '', type: '', board: 'students', formError: '' };
+  var brand = {}; // filled by a brand pack, if one is chosen (see applyBrand)
 
   // ---------- state ----------
   function fresh() { return JSON.parse(JSON.stringify(D.seed)); }
@@ -236,7 +237,8 @@
       '<button class="btn" data-action="print">Print or save as PDF</button></div>' +
       '<div class="card noprint"><label class="switch"><input type="checkbox" data-action="share"' + (state.share ? ' checked' : '') + '> Share with a link</label>' +
         (state.share ? '<p class="hint">Anyone with this link can view your transcript: <strong>waypoint.example/t/riley-okafor-7f3k</strong> (demo link, not live)</p>' : '<p class="hint">Off. Only you and college staff can see it.</p>') + '</div>' +
-      '<div class="paper"><div class="row between"><div><h2>' + esc(D.college) + '</h2><div class="muted">Co-curricular transcript</div></div><div class="muted" style="text-align:right">Issued ' + esc(today()) + '<br>Sample — not an official document</div></div><hr class="rule">' +
+      '<div class="paper"><div class="row between" style="align-items:flex-start"><div>' + (brand.logo ? '<img class="paperlogo" src="' + esc(brand.logo) + '" alt="' + esc(brand.alt) + '">' : '<h2>' + esc(D.college) + '</h2>') +
+          '<div class="muted">Co-curricular transcript</div></div><div class="muted" style="text-align:right">Issued ' + esc(today()) + '<br><strong>Sample</strong> — not an official document</div></div><hr class="rule">' +
         '<h3>' + esc(D.me.name) + '</h3><div class="muted">' + esc(D.me.program) + ' · ' + esc(D.me.year) + '</div>' +
         '<p style="margin-top:10px"><strong>' + points() + '</strong> points · Level ' + L.cur.n + ', ' + esc(L.cur.name) + ' · <strong>' + done.length + '</strong> ' + (done.length === 1 ? 'activity' : 'activities') + ' · <strong>' + earned().length + '</strong> ' + (earned().length === 1 ? 'badge' : 'badges') + '</p>' +
         '<h3 style="margin-top:18px">Competencies</h3><p class="muted">' + D.competencies.map(function (c) { return esc(c.name) + ' (' + cc[c.id] + ')'; }).join(' · ') + '</p>' +
@@ -291,7 +293,7 @@
     else if (r.name === 'org') html = org(r.id);
     else if (r.name === 'board') html = board();
     else { r.name = 'home'; html = home(); }
-    main.innerHTML = html;
+    main.innerHTML = html + (brand.note ? '<p class="fine foot noprint">' + esc(brand.note) + '</p>' : '');
     var sect = staff ? WP.staff.section(r.parts.slice(1)) : ({ activity: 'explore', org: 'orgs' }[r.name] || r.name);
     var base = staff ? '#/staff/' : '#/';
     function links(list, tabs) {
@@ -370,14 +372,61 @@
   window.addEventListener('hashchange', go);
 
   // ---------- start ----------
-  document.getElementById('brandName').textContent = D.appName;
-  document.getElementById('brandName2').textContent = D.appName;
-  document.getElementById('college').textContent = D.college;
+  // ---------- brand packs ----------
+  // A pack restyles the app for one college: its name, colours and logo. It lives in
+  // app/brand/<id>/brand.js and is chosen with ?brand=<id> (remembered in this browser;
+  // ?brand=default goes back). See app/brand/README.md.
+  var BRAND_KEY = 'waypoint-brand';
+  function brandId() {
+    var m = /[?&]brand=([a-z0-9-]+)/i.exec(location.search), id = m ? m[1].toLowerCase() : null;
+    try { if (id) localStorage.setItem(BRAND_KEY, id); else id = localStorage.getItem(BRAND_KEY); } catch (e) {}
+    return id && id !== 'default' ? id : null;
+  }
+  function loadBrand(done) {
+    var id = brandId();
+    if (!id) return done();
+    var s = document.createElement('script');
+    s.src = 'brand/' + id + '/brand.js';
+    s.onload = function () { applyBrand(window.WP_BRAND, id); done(); };
+    s.onerror = function () { try { localStorage.removeItem(BRAND_KEY); } catch (e) {} done(); }; // no such pack: stay on the default look
+    document.head.appendChild(s);
+  }
+  function applyBrand(b, id) {
+    if (!b) return;
+    var base = 'brand/' + id + '/';
+    function path(f) { return f ? (/^(data:|https?:)/.test(f) ? f : base + f) : ''; }
+    function block(sel, map) { return sel + '{' + Object.keys(map || {}).map(function (k) { return k + ':' + map[k]; }).join(';') + '}'; }
+    if (b.college) D.college = b.college;
+    if (b.appName) D.appName = b.appName;
+    if (typeof b.data === 'function') b.data(D);
+    // Colours: light tokens, then dark ones for the dark switch and for a dark system setting.
+    var root = ':root[data-brand="' + id + '"]', st = document.createElement('style');
+    st.textContent = block(root, b.light) + block(root + '[data-theme="dark"]', b.dark) +
+      '@media (prefers-color-scheme: dark){' + block(root + ':not([data-theme="light"])', b.dark) + '}';
+    document.head.appendChild(st);
+    document.documentElement.setAttribute('data-brand', id);
+    brand = { id: id, logo: path(b.logo), mark: path(b.mark), alt: b.logoAlt || D.college, note: b.note || '' };
+  }
+  // Names and logo in the sidebar and top bar.
+  function chrome() {
+    if (brand.logo) {
+      document.getElementById('brandSide').innerHTML = '<img class="brandlogo" src="' + esc(brand.logo) + '" alt="' + esc(brand.alt) + '">';
+      document.getElementById('brandTop').innerHTML = '<img class="brandmark" src="' + esc(brand.mark || brand.logo) + '" alt="' + esc(brand.alt) + '">';
+      document.getElementById('college').textContent = D.appName;
+    } else {
+      document.getElementById('brandName').textContent = D.appName;
+      document.getElementById('brandName2').textContent = D.appName;
+      document.getElementById('college').textContent = D.college;
+    }
+    if (brand.note) document.getElementById('fine').textContent = brand.note;
+    var ic = document.querySelector('link[rel=icon]');
+    if (brand.mark && ic) ic.href = brand.mark;
+  }
   // Shared with staff.js, which registers itself as WP.staff.
   var WP = window.WP = {
     D: D, ICON: ICON, TYPE: TYPE, s: function () { return state; }, save: save, render: render, toast: toast, esc: esc,
     act: act, acts: acts, comp: comp, today: today, words: words, status: status, points: points, level: level,
     compCounts: compCounts, doneList: doneList, earned: earned, completedAt: completedAt, compTags: compTags, opt: opt,
   };
-  document.addEventListener('DOMContentLoaded', function () { applyTheme(); render(); });
+  document.addEventListener('DOMContentLoaded', function () { applyTheme(); loadBrand(function () { chrome(); render(); }); });
 })();

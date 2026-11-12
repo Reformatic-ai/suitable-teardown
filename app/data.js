@@ -50,7 +50,7 @@ window.WP_DATA = {
     { id: 'a7', type: 'task', title: 'Lead a study group for four weeks', host: 'Learning Commons', depth: 4, points: 100,
       comps: ['lead', 'team'], proof: 'reflection', approval: true, minWords: 60,
       blurb: 'Organise and run a weekly study group. Reflect on what you changed after week one.' },
-    { id: 'a8', type: 'task', title: 'Write for the campus paper', host: 'The Northfield Post', depth: 3, points: 50,
+    { id: 'a8', type: 'task', title: 'Write for the campus paper', host: 'The Campus Post', depth: 3, points: 50,
       comps: ['comm', 'crit'], proof: 'file', approval: true,
       blurb: 'Publish one article of 600 words or more. Upload the published piece or a link saved as a PDF.' },
     { id: 'a9', type: 'task', title: 'Budget your term', host: 'Money Advice', depth: 1, points: 10,
@@ -87,7 +87,7 @@ window.WP_DATA = {
       people: [['Amara Lindqvist', 'President'], ['Tom Reyes', 'Treasurer'], ['Priya Nand', 'Garden lead']] },
     { id: 'o2', name: 'Debate Union', kind: 'Academic', members: 41, about: 'Weekly motions, training for new speakers, two away tournaments a year.', events: ['a3'],
       people: [['Jonah Ferreira', 'Chair'], ['Mei Tanaka', 'Training officer']] },
-    { id: 'o3', name: 'The Northfield Post', kind: 'Media', members: 29, about: 'The student paper. Writers, editors, photographers and designers welcome.', events: ['a8'],
+    { id: 'o3', name: 'The Campus Post', kind: 'Media', members: 29, about: 'The student paper. Writers, editors, photographers and designers welcome.', events: ['a8'],
       people: [['Sadie Brennan', 'Editor'], ['Kofi Mensah', 'News editor']] },
     { id: 'o4', name: 'Trail Running Club', kind: 'Sport', members: 63, about: 'Three runs a week at every pace, and one race weekend each term.', events: [],
       people: [['Lena Havel', 'Captain'], ['Omar Idris', 'Kit and routes']] },
@@ -114,7 +114,7 @@ window.WP_DATA = {
   baseDone: { a1: 38, a2: 22, a5: 61, a6: 17, a7: 6, a8: 9, a9: 44, a10: 12, a11: 14, a12: 19, s1: 5, s2: 11 },
   groups: [
     { name: 'Green Campus Society', points: 4210 }, { name: 'Peer Mentoring', points: 3890 }, { name: 'Debate Union', points: 2140 },
-    { name: 'The Northfield Post', points: 1675 }, { name: 'Trail Running Club', points: 1320 }, { name: 'Makers Collective', points: 940 },
+    { name: 'The Campus Post', points: 1675 }, { name: 'Trail Running Club', points: 1320 }, { name: 'Makers Collective', points: 940 },
   ],
 
   // What the demo starts with.

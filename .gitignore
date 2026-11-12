@@ -11,3 +11,7 @@ __pycache__/
 rea/
 .move-manifest.sha256
 !/app/index.html
+# Brand packs for real colleges stay local (see app/brand/README.md)
+app/brand/*
+!app/brand/README.md
+!app/brand/example/

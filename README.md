@@ -11,6 +11,8 @@
 >   - **Student view:** home, activity catalog, check-in by code, reflections and files, points, levels, badges, transcript, organizations, leaderboard.
 >   - **Staff view** (switch at the top): overview, approvals (approve, send back with a note, approve several at once), activities (create, edit, draft or publish), a door view for events (show the code, open or close check-in, give credit by hand) and a student roster.
 >   - Both views share the same data in the browser, so a staff decision shows up for the student straight away. In a real build the staff view would sit behind a staff sign-in.
+>   - **Brand packs:** restyle the app for a college (name, colours, logo) without touching the code. Try http://localhost:8765/app/?brand=example, and see [`app/brand/README.md`](app/brand/README.md). Packs for real colleges stay out of this repo.
+>   - **Test:** [`tools/app-walk.cjs`](tools/app-walk.cjs) drives a browser through both views and the brand packs, and checks layout width and text contrast.
 >   - To rename the app, change `appName` in `app/data.js`.
 > - `index.html` + `serve.sh`: read all of this as a small local site. Run `./serve.sh`, then open http://localhost:8765.
 >
